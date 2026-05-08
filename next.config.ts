@@ -9,6 +9,11 @@ const nextConfig: NextConfig = {
       },
     ],
   },
+  // Static export for Vercel
+  output: "export",
+  distDir: "dist",
+  // Handle trailing slashes
+  trailingSlash: true,
 };
 
 export default nextConfig;
