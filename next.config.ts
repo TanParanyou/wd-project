@@ -10,9 +10,14 @@ const nextConfig: NextConfig = {
       },
     ],
   },
-  // Static export for Vercel
-  output: "export",
-  distDir: "dist",
+  async rewrites() {
+    return [
+      {
+        source: "/",
+        destination: "/invitation",
+      },
+    ];
+  },
 };
 
 export default nextConfig;
