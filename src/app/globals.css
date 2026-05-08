@@ -1,26 +1,145 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-background: #FAFAF8;
+  --color-foreground: #2C2C2C;
+  --font-sans: var(--font-thai), system-ui, sans-serif;
+  --font-serif: var(--font-serif), Georgia, serif;
+  --font-handwritten: var(--font-handwritten), cursive;
+  --font-thai: var(--font-thai), system-ui, sans-serif;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+/* Paper texture background */
+body {
+  background-color: #FAFAF8;
+  background-image: 
+    url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100' height='100' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+  color: #2C2C2C;
+}
+
+/* Smooth scrolling */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #D1D1D1;
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #B1B1B1;
+}
+
+/* Scroll snap for desktop - smooth and optional */
+@media (min-width: 1024px) {
+  .snap-container {
+    scroll-snap-type: y proximity;
+    overflow-y: scroll;
+    height: 100vh;
+    scroll-behavior: smooth;
+  }
+  
+  .snap-section {
+    scroll-snap-align: start;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+  
+  .snap-container {
+    scroll-snap-type: none !important;
+  }
+}
+
+/* Font utilities */
+.font-serif {
+  font-family: var(--font-serif), Georgia, serif;
+}
+
+.font-handwritten {
+  font-family: var(--font-handwritten), cursive;
+}
+
+.font-thai {
+  font-family: var(--font-thai), system-ui, sans-serif;
+}
+
+/* Focus visible styles for accessibility */
+:focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: 2px;
+}
+
+/* Hide scrollbar for cleaner look on mobile */
+@media (max-width: 1023px) {
+  .snap-container {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  
+  .snap-container::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+/* Mobile quick actions spacing */
+.mobile-quick-actions {
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+/* Image loading skeleton */
+.image-skeleton {
+  background: linear-gradient(
+    90deg,
+    #f0f0f0 25%,
+    #e0e0e0 50%,
+    #f0f0f0 75%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+/* Button hover and active states */
+button, a {
+  transition: transform 0.2s ease, background-color 0.2s ease, color 0.2s ease;
+}
+
+button:active, a:active {
+  transform: scale(0.98);
+}
+
+/* Selection color */
+::selection {
+  background-color: rgba(0, 0, 0, 0.1);
+  color: inherit;
 }
