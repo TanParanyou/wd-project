@@ -1,17 +1,15 @@
 "use client";
 
 import { useEffect } from "react";
-import { useRouter } from "next/navigation";
 
 export default function HomePage() {
-  const router = useRouter();
-  
   useEffect(() => {
-    router.push("/invitation");
-  }, [router]);
+    // Redirect to invitation page
+    window.location.replace("/invitation");
+  }, []);
 
   return (
-    <div className="min-h-screen flex items-center justify-center">
+    <div className="min-h-screen flex items-center justify-center bg-[#FAFAF8]">
       <p className="font-thai text-gray-500">กำลังเปลี่ยนหน้า... รอสักครู่นะคะ</p>
     </div>
   );
