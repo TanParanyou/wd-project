@@ -37,6 +37,7 @@ interface YTPlayerVars {
   playlist?: string;
   modestbranding?: 0 | 1;
   enablejsapi?: 0 | 1;
+  playsinline?: 0 | 1;
   origin?: string;
   rel?: 0 | 1;
   showinfo?: 0 | 1;
@@ -91,6 +92,8 @@ const BackgroundMusic: React.FC<BackgroundMusicProps> = ({
           playlist: videoId,
           modestbranding: 1,
           enablejsapi: 1,
+          playsinline: 1, // จำเป็นมากสำหรับ Mobile
+          rel: 0,
         },
         events: {
           onReady: () => setIsPlayerReady(true),
@@ -125,8 +128,10 @@ const BackgroundMusic: React.FC<BackgroundMusicProps> = ({
 
   return (
     <div className="fixed bottom-6 left-6 z-50 flex items-center gap-3">
-      {/* Hidden YouTube Player */}
-      <div id="youtube-player" className="hidden"></div>
+      {/* Container สำหรับ YouTube Player (ซ่อนไว้แต่ไม่ใช้ display:none เพื่อให้ Mobile ยอมเล่น) */}
+      <div className="fixed -top-10 -left-10 w-1 h-1 overflow-hidden pointer-events-none opacity-0">
+        <div id="youtube-player"></div>
+      </div>
 
       <div className="relative">
         <motion.button
