@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useRef, useEffect } from "react";
-import { Volume2, VolumeX } from "lucide-react";
+import { Volume2, VolumeX, Music } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
 interface BackgroundMusicProps {
@@ -14,38 +14,79 @@ const BackgroundMusic: React.FC<BackgroundMusicProps> = ({
   const [isPlaying, setIsPlaying] = useState(false);
   const [hasInteracted, setHasInteracted] = useState(false);
   const [isAudioReady, setIsAudioReady] = useState(false);
-  const [error, setError] = useState("");
+  const [loadError, setLoadError] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
   useEffect(() => {
     // สร้าง audio element
-    const audio = new Audio(audioSrc);
+    const audio = new Audio();
     audio.loop = true;
-    audio.preload = "auto";
-    
-    // ตั้งค่า volume
+    audio.preload = "metadata"; // โหลดแค่ metadata ก่อน เร็วกว่า
     audio.volume = 0.5;
     
-    // Event listeners
-    audio.addEventListener('canplaythrough', () => {
-      setIsAudioReady(true);
-    });
+    let isMounted = true;
     
-    audio.addEventListener('error', (e) => {
-      console.error('Audio error:', e);
-      setError("ไม่สามารถโหลดเพลงได้");
-    });
+    // Event listeners
+    const handleCanPlay = () => {
+      if (isMounted) {
+        setIsAudioReady(true);
+        setLoadError(false);
+      }
+    };
+    
+    const handleError = () => {
+      if (isMounted) {
+        console.error('Audio load error');
+        setLoadError(true);
+        setIsAudioReady(false);
+      }
+    };
+    
+    const handleLoadedMetadata = () => {
+      if (isMounted) {
+        setIsAudioReady(true);
+      }
+    };
+    
+    audio.addEventListener('canplay', handleCanPlay);
+    audio.addEventListener('canplaythrough', handleCanPlay);
+    audio.addEventListener('loadedmetadata', handleLoadedMetadata);
+    audio.addEventListener('error', handleError);
+    
+    // ตั้งค่า src หลังจาก add event listeners
+    audio.src = audioSrc;
+    audio.load();
     
     audioRef.current = audio;
     
+    // Timeout สำหรับตรวจสอบว่าโหลดนานเกินไป
+    const timeoutId = setTimeout(() => {
+      if (isMounted && !isAudioReady) {
+        console.log('Audio load timeout - file may not exist');
+        setLoadError(true);
+      }
+    }, 5000);
+    
     return () => {
+      isMounted = false;
+      clearTimeout(timeoutId);
       audio.pause();
       audio.src = "";
+      audio.removeEventListener('canplay', handleCanPlay);
+      audio.removeEventListener('canplaythrough', handleCanPlay);
+      audio.removeEventListener('loadedmetadata', handleLoadedMetadata);
+      audio.removeEventListener('error', handleError);
     };
   }, [audioSrc]);
 
   const togglePlay = async () => {
-    if (!audioRef.current || !isAudioReady) return;
+    if (!audioRef.current) return;
+    
+    // ถ้าไฟล์ไม่พร้อม ให้ลองโหลดใหม่
+    if (!isAudioReady) {
+      audioRef.current.load();
+      return;
+    }
     
     try {
       if (isPlaying) {
@@ -63,10 +104,8 @@ const BackgroundMusic: React.FC<BackgroundMusicProps> = ({
       }
     } catch (err) {
       console.error("Play error:", err);
-      setError("กรุณาแตะอีกครั้งเพื่อเล่นเพลง");
-      
-      // ลองใหม่หลังจาก user interaction
-      setTimeout(() => setError(""), 3000);
+      // บน mobile อาจต้องการ interaction ก่อน
+      setIsPlaying(false);
     }
   };
 
@@ -79,10 +118,9 @@ const BackgroundMusic: React.FC<BackgroundMusicProps> = ({
           animate={{ scale: 1, opacity: 1 }}
           whileHover={{ scale: 1.1 }}
           whileTap={{ scale: 0.9 }}
-          className={`flex h-12 w-12 items-center justify-center rounded-full shadow-xl backdrop-blur-md border border-neutral-200 bg-white/90 text-neutral-800 ${
-            !isAudioReady && 'opacity-50 cursor-not-allowed'
+          className={`flex h-12 w-12 items-center justify-center rounded-full shadow-xl backdrop-blur-md border border-neutral-200 bg-white/90 text-neutral-800 transition-opacity ${
+            !isAudioReady && !loadError ? 'opacity-70' : ''
           }`}
-          disabled={!isAudioReady}
           aria-label={isPlaying ? "Pause Music" : "Play Music"}
         >
           <AnimatePresence mode="wait">
@@ -92,6 +130,7 @@ const BackgroundMusic: React.FC<BackgroundMusicProps> = ({
                 initial={{ rotate: -180, opacity: 0 }}
                 animate={{ rotate: 0, opacity: 1 }}
                 exit={{ rotate: 180, opacity: 0 }}
+                className="relative"
               >
                 <Volume2 className="h-5 w-5 text-neutral-800" />
                 <motion.div
@@ -99,6 +138,15 @@ const BackgroundMusic: React.FC<BackgroundMusicProps> = ({
                   animate={{ scale: [1, 1.5, 1], opacity: [0.5, 0, 0.5] }}
                   transition={{ duration: 2, repeat: Infinity }}
                 />
+              </motion.div>
+            ) : loadError ? (
+              <motion.div
+                key="error"
+                initial={{ rotate: 180, opacity: 0 }}
+                animate={{ rotate: 0, opacity: 1 }}
+                exit={{ rotate: -180, opacity: 0 }}
+              >
+                <Music className="h-5 w-5 text-neutral-400" />
               </motion.div>
             ) : (
               <motion.div
@@ -115,33 +163,24 @@ const BackgroundMusic: React.FC<BackgroundMusicProps> = ({
       </div>
 
       <AnimatePresence>
-        {!hasInteracted && isAudioReady && (
+        {!hasInteracted && isAudioReady && !loadError && (
           <motion.div
             initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: 20 }}
-            className="bg-neutral-800 text-white px-3 py-1.5 rounded-lg text-xs font-medium shadow-lg"
+            className="bg-neutral-800 text-white px-3 py-1.5 rounded-lg text-xs font-medium shadow-lg whitespace-nowrap"
           >
             กดเพื่อเปิดเพลง 🎵
           </motion.div>
         )}
-        {error && (
+        {loadError && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="bg-red-500 text-white px-3 py-1.5 rounded-lg text-xs font-medium shadow-lg"
+            className="bg-yellow-500 text-white px-3 py-1.5 rounded-lg text-xs font-medium shadow-lg whitespace-nowrap"
           >
-            {error}
-          </motion.div>
-        )}
-        {!isAudioReady && !error && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            className="text-[10px] text-neutral-400 uppercase tracking-tighter"
-          >
-            กำลังโหลด...
+            ไม่พบไฟล์เพลง
           </motion.div>
         )}
       </AnimatePresence>
