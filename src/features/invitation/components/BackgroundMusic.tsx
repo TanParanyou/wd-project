@@ -5,134 +5,73 @@ import { Volume2, VolumeX } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
 interface BackgroundMusicProps {
-  videoId?: string;
-}
-
-// Minimal YouTube API types (ES2015 Module Syntax)
-interface YTPlayer {
-  playVideo(): void;
-  pauseVideo(): void;
-  stopVideo(): void;
-  seekTo(seconds: number, allowSeekAhead: boolean): void;
-  getVolume(): number;
-  setVolume(volume: number): void;
-  mute(): void;
-  unMute(): void;
-  getPlayerState(): number;
-  destroy(): void;
-}
-
-interface YTPlayerOptions {
-  height?: string | number;
-  width?: string | number;
-  videoId?: string;
-  playerVars?: YTPlayerVars;
-  events?: YTPlayerEvents;
-}
-
-interface YTPlayerVars {
-  autoplay?: 0 | 1;
-  controls?: 0 | 1 | 2;
-  loop?: 0 | 1;
-  playlist?: string;
-  modestbranding?: 0 | 1;
-  enablejsapi?: 0 | 1;
-  playsinline?: 0 | 1;
-  origin?: string;
-  rel?: 0 | 1;
-  showinfo?: 0 | 1;
-}
-
-interface YTPlayerEvents {
-  onReady?: (event: { target: YTPlayer }) => void;
-  onStateChange?: (event: { target: YTPlayer; data: number }) => void;
-  onError?: (event: { target: YTPlayer; data: number }) => void;
-}
-
-interface YTAPI {
-  Player: {
-    new(elementId: string, options: YTPlayerOptions): YTPlayer;
-  };
-}
-
-declare global {
-  interface Window {
-    YT: YTAPI;
-    onYouTubeIframeAPIReady: () => void;
-  }
+  audioSrc?: string;
 }
 
 const BackgroundMusic: React.FC<BackgroundMusicProps> = ({
-  videoId = "DSWYAclv2I8"
+  audioSrc = "/audio/background.mp3"
 }) => {
   const [isPlaying, setIsPlaying] = useState(false);
   const [hasInteracted, setHasInteracted] = useState(false);
-  const [isPlayerReady, setIsPlayerReady] = useState(false);
-  const playerRef = useRef<YTPlayer | null>(null);
+  const [isAudioReady, setIsAudioReady] = useState(false);
+  const [error, setError] = useState("");
+  const audioRef = useRef<HTMLAudioElement | null>(null);
 
   useEffect(() => {
-    // Load YouTube IFrame API
-    if (!window.YT) {
-      const tag = document.createElement('script');
-      tag.src = "https://www.youtube.com/iframe_api";
-      const firstScriptTag = document.getElementsByTagName('script')[0];
-      firstScriptTag.parentNode?.insertBefore(tag, firstScriptTag);
-    }
-
-    // Initialize player when API is ready
-    window.onYouTubeIframeAPIReady = () => {
-      playerRef.current = new window.YT.Player('youtube-player', {
-        height: '0',
-        width: '0',
-        videoId: videoId,
-        playerVars: {
-          autoplay: 0,
-          controls: 0,
-          loop: 1,
-          playlist: videoId,
-          modestbranding: 1,
-          enablejsapi: 1,
-          playsinline: 1, // จำเป็นมากสำหรับ Mobile
-          rel: 0,
-        },
-        events: {
-          onReady: () => setIsPlayerReady(true),
-        },
-      });
-    };
-
-    // If API is already loaded
-    if (window.YT && window.YT.Player) {
-      window.onYouTubeIframeAPIReady();
-    }
-
+    // สร้าง audio element
+    const audio = new Audio(audioSrc);
+    audio.loop = true;
+    audio.preload = "auto";
+    
+    // ตั้งค่า volume
+    audio.volume = 0.5;
+    
+    // Event listeners
+    audio.addEventListener('canplaythrough', () => {
+      setIsAudioReady(true);
+    });
+    
+    audio.addEventListener('error', (e) => {
+      console.error('Audio error:', e);
+      setError("ไม่สามารถโหลดเพลงได้");
+    });
+    
+    audioRef.current = audio;
+    
     return () => {
-      if (playerRef.current) {
-        playerRef.current.destroy();
-      }
+      audio.pause();
+      audio.src = "";
     };
-  }, [videoId]);
+  }, [audioSrc]);
 
-  const togglePlay = () => {
-    if (playerRef.current && isPlayerReady) {
+  const togglePlay = async () => {
+    if (!audioRef.current || !isAudioReady) return;
+    
+    try {
       if (isPlaying) {
-        playerRef.current.pauseVideo();
+        audioRef.current.pause();
         setIsPlaying(false);
       } else {
-        playerRef.current.playVideo();
-        setIsPlaying(true);
-        setHasInteracted(true);
+        // สำหรับ mobile: ต้อง play ภายใน user interaction
+        const playPromise = audioRef.current.play();
+        
+        if (playPromise !== undefined) {
+          await playPromise;
+          setIsPlaying(true);
+          setHasInteracted(true);
+        }
       }
+    } catch (err) {
+      console.error("Play error:", err);
+      setError("กรุณาแตะอีกครั้งเพื่อเล่นเพลง");
+      
+      // ลองใหม่หลังจาก user interaction
+      setTimeout(() => setError(""), 3000);
     }
   };
 
   return (
     <div className="fixed top-6 right-6 z-50 flex items-center gap-3">
-      {/* Container สำหรับ YouTube Player (ซ่อนไว้แต่ไม่ใช้ display:none เพื่อให้ Mobile ยอมเล่น) */}
-      <div className="fixed -top-10 -left-10 w-1 h-1 overflow-hidden pointer-events-none opacity-0">
-        <div id="youtube-player"></div>
-      </div>
-
       <div className="relative">
         <motion.button
           onClick={togglePlay}
@@ -140,9 +79,10 @@ const BackgroundMusic: React.FC<BackgroundMusicProps> = ({
           animate={{ scale: 1, opacity: 1 }}
           whileHover={{ scale: 1.1 }}
           whileTap={{ scale: 0.9 }}
-          className={`flex h-12 w-12 items-center justify-center rounded-full shadow-xl backdrop-blur-md border border-neutral-200 bg-white/90 text-neutral-800 ${!isPlayerReady && 'opacity-50 cursor-not-allowed'
-            }`}
-          disabled={!isPlayerReady}
+          className={`flex h-12 w-12 items-center justify-center rounded-full shadow-xl backdrop-blur-md border border-neutral-200 bg-white/90 text-neutral-800 ${
+            !isAudioReady && 'opacity-50 cursor-not-allowed'
+          }`}
+          disabled={!isAudioReady}
           aria-label={isPlaying ? "Pause Music" : "Play Music"}
         >
           <AnimatePresence mode="wait">
@@ -175,17 +115,27 @@ const BackgroundMusic: React.FC<BackgroundMusicProps> = ({
       </div>
 
       <AnimatePresence>
-        {!hasInteracted && isPlayerReady && (
+        {!hasInteracted && isAudioReady && (
           <motion.div
             initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: 20 }}
-            className="bg-neutral-800 text-white px-3 py-1.5 rounded-lg text-xs font-medium shadow-lg sm:block hidden order-first"
+            className="bg-neutral-800 text-white px-3 py-1.5 rounded-lg text-xs font-medium shadow-lg"
           >
-            กดเพื่อเปิดเพลงจาก YouTube 🎵
+            กดเพื่อเปิดเพลง 🎵
           </motion.div>
         )}
-        {!isPlayerReady && (
+        {error && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="bg-red-500 text-white px-3 py-1.5 rounded-lg text-xs font-medium shadow-lg"
+          >
+            {error}
+          </motion.div>
+        )}
+        {!isAudioReady && !error && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -200,10 +150,3 @@ const BackgroundMusic: React.FC<BackgroundMusicProps> = ({
 };
 
 export default BackgroundMusic;
-
-declare global {
-  interface Window {
-    YT: YTAPI;
-    onYouTubeIframeAPIReady: () => void;
-  }
-}
