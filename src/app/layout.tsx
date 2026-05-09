@@ -42,7 +42,7 @@ export const metadata: Metadata = {
     locale: "th_TH",
     siteName: "Nan & Tan Invitation",
     images: [{
-      url: "/favicon.png",
+      url: "/images/seo-image.png",
       width: 1200,
       height: 630,
       alt: "Nan & Tan - Housewarming Ceremony Invitation",
@@ -52,7 +52,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "Nan & Tan - Housewarming Ceremony",
     description: "ขอเรียนเชิญร่วมงานทำบุญขึ้นบ้านใหม่ และพิธีผูกข้อมือ",
-    images: ["/favicon.png"],
+    images: ["/images/seo-image.png"],
   },
   alternates: {
     canonical: "/",
