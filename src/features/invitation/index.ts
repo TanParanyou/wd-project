@@ -13,6 +13,9 @@ export { default as CountdownTimer } from "./components/CountdownTimer";
 export { default as ShareButton } from "./components/ShareButton";
 export { default as StickyNav } from "./components/StickyNav";
 export { default as BackgroundMusic } from "./components/BackgroundMusic";
+export { default as DonationSection } from "./components/DonationSection";
+export { default as GuestbookSection } from "./components/GuestbookSection";
+export { default as ParkingSection } from "./components/ParkingSection";
 
 export { invitationConfig } from "./data/invitation.config";
 export * from "./types/invitation.type";

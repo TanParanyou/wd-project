@@ -76,6 +76,47 @@ export interface RSVP {
   url: string;
 }
 
+export interface Donation {
+  enabled: boolean;
+  title: string;
+  description: string;
+  accounts: DonationAccount[];
+}
+
+export interface DonationAccount {
+  bank: string;
+  accountNumber: string;
+  accountName: string;
+  qrImage?: string;
+}
+
+export interface Guestbook {
+  enabled: boolean;
+  title: string;
+  description: string;
+  formUrl: string;
+  sheetId: string;
+}
+
+export interface Parking {
+  enabled: boolean;
+  title: string;
+  description: string;
+  locations: ParkingLocation[];
+}
+
+export interface ParkingLocation {
+  id: string;
+  name: string;
+  description: string;
+  mapUrl?: string;
+  embedUrl?: string;
+  capacity?: string;
+  type: "car" | "motorcycle" | "both";
+  distance?: string;
+  image?: string;
+}
+
 export interface InvitationConfig {
   couple: Couple;
   event: Event;
@@ -86,4 +127,7 @@ export interface InvitationConfig {
   contacts: Contact[];
   gallery: GalleryImage[];
   rsvp: RSVP;
+  donation: Donation;
+  guestbook: Guestbook;
+  parking: Parking;
 }

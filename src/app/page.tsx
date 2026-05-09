@@ -7,6 +7,9 @@ import {
   GallerySection,
   RouteSelectorSection,
   ContactSection,
+  ParkingSection,
+  DonationSection,
+  GuestbookSection,
   FooterSection,
   MobileQuickActions,
   StickyNav,
@@ -43,6 +46,18 @@ export default function HomePage() {
 
         <AnimatedSection animation="fade-up" delay={0.1} className="snap-section">
           <ContactSection />
+        </AnimatedSection>
+
+        <AnimatedSection animation="fade-up" delay={0.1} className="snap-section">
+          <ParkingSection />
+        </AnimatedSection>
+
+        <AnimatedSection animation="fade-up" delay={0.1} className="snap-section">
+          <GuestbookSection />
+        </AnimatedSection>
+
+        <AnimatedSection animation="fade-up" delay={0.1} className="snap-section">
+          <DonationSection />
         </AnimatedSection>
 
         <AnimatedSection animation="fade-in" delay={0.1} className="snap-section">

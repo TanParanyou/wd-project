@@ -167,4 +167,42 @@ export const invitationConfig: InvitationConfig = {
     label: "ยืนยันเข้าร่วมงาน",
     url: "",
   },
+
+  donation: {
+    enabled: true,
+    title: "สำหรับแขกที่ไม่ได้มางาน",
+    description: "หากไม่สะดวกมาร่วมงาน สามารถร่วมแสดงความยินดีได้ผ่านช่องทางนี้",
+    accounts: [
+      {
+        bank: "พร้อมเพย์",
+        accountNumber: "0998266076",
+        accountName: "ภรัณยู เลิศทรัพย์ไพศาล",
+        qrImage: "/images/donet/donation-qr.jpg",
+      },
+    ],
+  },
+
+  guestbook: {
+    enabled: true,
+    title: "Guestbook",
+    description: "ฝากคำอวยพรให้เราหน่อยนะ",
+    formUrl: "https://docs.google.com/forms/d/e/1FAIpQLSdVbBSAWthZ91rMm8Z7idFGtih9RIZ4dt9v0dh84Xv5h3WE1Q/viewform",
+    sheetId: "1IWiYbQtrLwbvRgsK4O12uOMDyhMFOTC2OhdvpcYtMQI",
+  },
+
+  parking: {
+    enabled: false,
+    title: "ที่จอดรถ",
+    description: "จุดจอดรถบริเวณงาน",
+    locations: [
+      {
+        id: "parking-1",
+        name: "จุดจอดรถหลัก",
+        description: "ที่จอดรถหลักบริเวณหน้าบ้าน",
+        type: "both",
+        capacity: "ประมาณ 10 คัน",
+        distance: "0 เมตร (หน้าบ้าน)",
+      },
+    ],
+  },
 };
