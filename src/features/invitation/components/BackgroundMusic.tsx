@@ -14,67 +14,63 @@ const BackgroundMusic: React.FC<BackgroundMusicProps> = ({
   const [isPlaying, setIsPlaying] = useState(false);
   const [hasInteracted, setHasInteracted] = useState(false);
   const [isAudioReady, setIsAudioReady] = useState(false);
-  const [loadError, setLoadError] = useState(false);
+  const [showError, setShowError] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
-    // สร้าง audio element
     const audio = new Audio();
     audio.loop = true;
-    audio.preload = "metadata"; // โหลดแค่ metadata ก่อน เร็วกว่า
+    audio.preload = "auto";
     audio.volume = 0.5;
     
     let isMounted = true;
+    let hasLoaded = false;
     
-    // Event listeners
     const handleCanPlay = () => {
-      if (isMounted) {
+      if (isMounted && !hasLoaded) {
+        hasLoaded = true;
         setIsAudioReady(true);
-        setLoadError(false);
+        setShowError(false);
+        // เคลียร์ timeout เมื่อโหลดสำเร็จ
+        if (timeoutRef.current) {
+          clearTimeout(timeoutRef.current);
+          timeoutRef.current = null;
+        }
       }
     };
     
     const handleError = () => {
-      if (isMounted) {
-        console.error('Audio load error');
-        setLoadError(true);
+      if (isMounted && !hasLoaded) {
+        hasLoaded = true;
+        setShowError(true);
         setIsAudioReady(false);
       }
     };
     
-    const handleLoadedMetadata = () => {
-      if (isMounted) {
-        setIsAudioReady(true);
-      }
-    };
-    
-    audio.addEventListener('canplay', handleCanPlay);
     audio.addEventListener('canplaythrough', handleCanPlay);
-    audio.addEventListener('loadedmetadata', handleLoadedMetadata);
     audio.addEventListener('error', handleError);
     
-    // ตั้งค่า src หลังจาก add event listeners
     audio.src = audioSrc;
     audio.load();
     
     audioRef.current = audio;
     
-    // Timeout สำหรับตรวจสอบว่าโหลดนานเกินไป
-    const timeoutId = setTimeout(() => {
-      if (isMounted && !isAudioReady) {
-        console.log('Audio load timeout - file may not exist');
-        setLoadError(true);
+    // Timeout 8 วินาที
+    timeoutRef.current = setTimeout(() => {
+      if (isMounted && !hasLoaded) {
+        setShowError(true);
       }
-    }, 5000);
+    }, 8000);
     
     return () => {
       isMounted = false;
-      clearTimeout(timeoutId);
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
       audio.pause();
       audio.src = "";
-      audio.removeEventListener('canplay', handleCanPlay);
       audio.removeEventListener('canplaythrough', handleCanPlay);
-      audio.removeEventListener('loadedmetadata', handleLoadedMetadata);
       audio.removeEventListener('error', handleError);
     };
   }, [audioSrc]);
@@ -82,7 +78,6 @@ const BackgroundMusic: React.FC<BackgroundMusicProps> = ({
   const togglePlay = async () => {
     if (!audioRef.current) return;
     
-    // ถ้าไฟล์ไม่พร้อม ให้ลองโหลดใหม่
     if (!isAudioReady) {
       audioRef.current.load();
       return;
@@ -93,7 +88,6 @@ const BackgroundMusic: React.FC<BackgroundMusicProps> = ({
         audioRef.current.pause();
         setIsPlaying(false);
       } else {
-        // สำหรับ mobile: ต้อง play ภายใน user interaction
         const playPromise = audioRef.current.play();
         
         if (playPromise !== undefined) {
@@ -104,7 +98,6 @@ const BackgroundMusic: React.FC<BackgroundMusicProps> = ({
       }
     } catch (err) {
       console.error("Play error:", err);
-      // บน mobile อาจต้องการ interaction ก่อน
       setIsPlaying(false);
     }
   };
@@ -118,9 +111,7 @@ const BackgroundMusic: React.FC<BackgroundMusicProps> = ({
           animate={{ scale: 1, opacity: 1 }}
           whileHover={{ scale: 1.1 }}
           whileTap={{ scale: 0.9 }}
-          className={`flex h-12 w-12 items-center justify-center rounded-full shadow-xl backdrop-blur-md border border-neutral-200 bg-white/90 text-neutral-800 transition-opacity ${
-            !isAudioReady && !loadError ? 'opacity-70' : ''
-          }`}
+          className="flex h-12 w-12 items-center justify-center rounded-full shadow-xl backdrop-blur-md border border-neutral-200 bg-white/90 text-neutral-800"
           aria-label={isPlaying ? "Pause Music" : "Play Music"}
         >
           <AnimatePresence mode="wait">
@@ -139,15 +130,6 @@ const BackgroundMusic: React.FC<BackgroundMusicProps> = ({
                   transition={{ duration: 2, repeat: Infinity }}
                 />
               </motion.div>
-            ) : loadError ? (
-              <motion.div
-                key="error"
-                initial={{ rotate: 180, opacity: 0 }}
-                animate={{ rotate: 0, opacity: 1 }}
-                exit={{ rotate: -180, opacity: 0 }}
-              >
-                <Music className="h-5 w-5 text-neutral-400" />
-              </motion.div>
             ) : (
               <motion.div
                 key="paused"
@@ -155,7 +137,11 @@ const BackgroundMusic: React.FC<BackgroundMusicProps> = ({
                 animate={{ rotate: 0, opacity: 1 }}
                 exit={{ rotate: -180, opacity: 0 }}
               >
-                <VolumeX className="h-5 w-5 text-neutral-400" />
+                {showError && !isAudioReady ? (
+                  <Music className="h-5 w-5 text-neutral-400" />
+                ) : (
+                  <VolumeX className="h-5 w-5 text-neutral-400" />
+                )}
               </motion.div>
             )}
           </AnimatePresence>
@@ -163,7 +149,7 @@ const BackgroundMusic: React.FC<BackgroundMusicProps> = ({
       </div>
 
       <AnimatePresence>
-        {!hasInteracted && isAudioReady && !loadError && (
+        {!hasInteracted && isAudioReady && (
           <motion.div
             initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0 }}
@@ -173,7 +159,7 @@ const BackgroundMusic: React.FC<BackgroundMusicProps> = ({
             กดเพื่อเปิดเพลง 🎵
           </motion.div>
         )}
-        {loadError && (
+        {showError && !isAudioReady && !isPlaying && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
