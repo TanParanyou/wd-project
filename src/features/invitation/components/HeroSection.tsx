@@ -10,6 +10,7 @@ export default function HeroSection() {
 
   return (
     <section 
+      id="hero"
       className="min-h-screen flex flex-col items-center justify-center px-6 py-20 relative overflow-hidden"
       aria-label="หน้าแรก"
     >

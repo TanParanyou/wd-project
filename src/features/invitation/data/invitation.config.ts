@@ -27,9 +27,8 @@ export const invitationConfig: InvitationConfig = {
   schedule: [
     { time: "07:00", title: "พิธีสงฆ์ขึ้นบ้านใหม่" },
     { time: "08:00", title: "ถวายภัตตาหารเช้า" },
-    { time: "09:00", title: "ขบวนแห่ขันหมาก + เข้าเฟรี" },
-    { time: "10:00", title: "พิธีผูกข้อมือ" },
-    { time: "11:30", title: "รับประทานอาหาร" },
+    { time: "09:00", title: "ขบวนแห่ขันหมาก" },
+    { time: "10:00", title: "รับประทานอาหาร (โต๊ะจีน)" },
   ],
 
   dressCode: {
@@ -52,6 +51,7 @@ export const invitationConfig: InvitationConfig = {
       mapUrl: "https://maps.app.goo.gl/mm6vJ8hsceXEXpYJ6",
       streetViewUrl: "https://www.google.com/maps/embed?pb=!4v1778256557827!6m8!1m7!1s6i4sB-lC_RAs_ETK4DTcvg!2m2!1d13.80781543266652!2d100.8271728019249!3f187.80716!4f0!5f0.7820865974627469",
       description: "เหมาะสำหรับแขกที่เดินทางมาจากถนนสุวินทวงศ์",
+      vehicleType: "car",
       steps: [
         {
           title: "Step 1: เริ่มจากหน้าซอยสุวินทวงศ์ 52",
@@ -82,6 +82,7 @@ export const invitationConfig: InvitationConfig = {
       mapUrl: "https://maps.app.goo.gl/7yLufE9VzVE5c8HP8",
       streetViewUrl: "https://www.google.com/maps/embed?pb=!4v1778256657393!6m8!1m7!1saHdyPrnzhlKd4uk102XJfA!2m2!1d13.78691621231334!2d100.824727192873!3f276.15233402746!4f7.933776137354741!5f0.7820865974627469",
       description: "อีกหนึ่งทางเลือกสำหรับแขกที่สะดวกเข้าทางซอยวัดอู่ตะเภา",
+      vehicleType: "car",
       steps: [
         {
           title: "Step 1: เริ่มจากหน้าซอยวัดอู่ตะเภา",
@@ -105,13 +106,39 @@ export const invitationConfig: InvitationConfig = {
         },
       ],
     },
+    {
+      id: "suwinthawong-48-motorcycle",
+      name: "ทางเข้าสุวินทวงศ์ 48 (มอเตอร์ไซค์เท่านั้น)",
+      address: "Suwinthawong 48, Khwaeng Lam Phakchi, Khet Nong Chok, Krung Thep Maha Nakhon 10530",
+      mapUrl: "https://maps.app.goo.gl/Wm7L8SK4mYPdWiya8",
+      streetViewUrl: "https://www.google.com/maps/embed?pb=!4v1778295294208!6m8!1m7!1swrEpk31RyEWXzyWc1phveQ!2m2!1d13.80834611214116!2d100.8218975532223!3f228.61617621552034!4f1.8592926984361213!5f1.1924812503605782",
+      description: "เฉพาะมอเตอร์ไซค์เท่านั้น - ทางลัดเข้าซอยสุวินทวงศ์ 48",
+      vehicleType: "motorcycle",
+      steps: [
+        {
+          title: "Step 1: เริ่มจากหน้าซอยสุวินทวงศ์ 48",
+          description: "เปิดแผนที่มายังจุดหน้าซอยก่อน (เฉพาะมอเตอร์ไซค์)",
+          image: "/images/routes/suwinthawong-48/step-1.jpg",
+        },
+        {
+          title: "Step 2: เข้าซอยตรงมา",
+          description: "ขับตรงเข้ามาตามทาง",
+          image: "/images/routes/suwinthawong-48/step-2.jpg",
+        },
+        {
+          title: "Step 3: ถึงหน้าบ้าน",
+          description: "ยินดีต้อนรับ",
+          image: "/images/routes/suwinthawong-48/step-3.jpg",
+        },
+      ],
+    },
   ],
 
   contacts: [
     {
       name: "Tan",
       phone: "0998266076",
-      lineUrl: "",
+      lineUrl: "https://line.me/ti/p/RKAsilibae",
     },
     {
       name: "Nan",

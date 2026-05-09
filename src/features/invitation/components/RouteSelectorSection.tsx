@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { MapPin, ChevronDown, Eye } from "lucide-react";
+import { MapPin, ChevronDown, Bike, Car } from "lucide-react";
 import { invitationConfig } from "../data/invitation.config";
 import { openMap } from "../utils/invitation.utils";
 // import RouteStepTimeline from "./RouteStepTimeline";
@@ -13,8 +13,12 @@ export default function RouteSelectorSection() {
 
   const activeRoute = routes.find((route) => route.id === selectedRoute);
 
+  // Separate routes by vehicle type
+  const carRoutes = routes.filter((route) => route.vehicleType === "car");
+  const motorcycleRoutes = routes.filter((route) => route.vehicleType === "motorcycle");
+
   return (
-    <section id="routes" className="py-20 px-6">
+    <section id="route" className="py-20 px-6">
       <div className="max-w-4xl mx-auto">
         <div className="text-center mb-12">
           <svg className="w-12 h-12 mx-auto mb-4" viewBox="0 0 100 100" fill="none" stroke="currentColor" strokeWidth="2">
@@ -30,58 +34,44 @@ export default function RouteSelectorSection() {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
-          {routes.map((route) => (
-            <motion.button
-              key={route.id}
-              onClick={() => {
-                setSelectedRoute(selectedRoute === route.id ? null : route.id);
-              }}
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-              className={`relative p-6 rounded-2xl border-2 text-left transition-colors duration-300 ${
-                selectedRoute === route.id
-                  ? "border-current bg-white"
-                  : "border-gray-200 hover:border-gray-300"
-              }`}
-            >
-              <div className="flex items-start justify-between mb-2">
-                <div className="flex items-center gap-2">
-                  <MapPin className="w-5 h-5 flex-shrink-0" />
-                  <h3 className="font-thai text-lg font-medium">
-                    {route.name}
-                  </h3>
-                </div>
-                <motion.div
-                  animate={{ rotate: selectedRoute === route.id ? 180 : 0 }}
-                  transition={{ duration: 0.3 }}
-                >
-                  <ChevronDown className="w-5 h-5" />
-                </motion.div>
-              </div>
+        {/* Car Routes */}
+        <div className="mb-8">
+          <div className="flex items-center gap-2 mb-4">
+            <Car className="w-5 h-5 text-blue-500" />
+            <h3 className="font-serif text-lg text-blue-600">
+              สำหรับรถยนต์
+            </h3>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {carRoutes.map((route) => (
+              <RouteCard
+                key={route.id}
+                route={route}
+                isSelected={selectedRoute === route.id}
+                onClick={() => setSelectedRoute(selectedRoute === route.id ? null : route.id)}
+              />
+            ))}
+          </div>
+        </div>
 
-              <p className="font-thai text-sm text-gray-600 mb-2">
-                {route.description}
-              </p>
-
-              <p className="font-serif text-xs text-gray-400">
-                {route.address}
-              </p>
-
-              <div className="mt-4 flex flex-wrap gap-2">
-                <span
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    openMap(route.mapUrl);
-                  }}
-                  className="inline-flex items-center gap-1 text-sm font-thai hover:underline cursor-pointer"
-                >
-                  <MapPin className="w-4 h-4" />
-                  เปิดแผนที่
-                </span>
-              </div>
-            </motion.button>
-          ))}
+        {/* Motorcycle Routes */}
+        <div className="mb-8">
+          <div className="flex items-center gap-2 mb-4">
+            <Bike className="w-5 h-5 text-orange-500" />
+            <h3 className="font-serif text-lg text-orange-600">
+              สำหรับมอเตอร์ไซค์เท่านั้น
+            </h3>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {motorcycleRoutes.map((route) => (
+              <RouteCard
+                key={route.id}
+                route={route}
+                isSelected={selectedRoute === route.id}
+                onClick={() => setSelectedRoute(selectedRoute === route.id ? null : route.id)}
+              />
+            ))}
+          </div>
         </div>
 
         <AnimatePresence mode="wait">
@@ -125,5 +115,70 @@ export default function RouteSelectorSection() {
         </AnimatePresence>
       </div>
     </section>
+  );
+}
+
+// Route Card Component
+interface RouteCardProps {
+  route: {
+    id: string;
+    name: string;
+    address: string;
+    mapUrl: string;
+    description: string;
+    vehicleType: string;
+  };
+  isSelected: boolean;
+  onClick: () => void;
+}
+
+function RouteCard({ route, isSelected, onClick }: RouteCardProps) {
+  return (
+    <motion.button
+      onClick={onClick}
+      whileHover={{ scale: 1.02 }}
+      whileTap={{ scale: 0.98 }}
+      className={`relative p-6 rounded-2xl border-2 text-left transition-colors duration-300 w-full ${
+        isSelected
+          ? "border-current bg-white"
+          : "border-gray-200 hover:border-gray-300"
+      }`}
+    >
+      <div className="flex items-start justify-between mb-2">
+        <div className="flex items-center gap-2">
+          <MapPin className="w-5 h-5 flex-shrink-0" />
+          <h3 className="font-thai text-lg font-medium">
+            {route.name}
+          </h3>
+        </div>
+        <motion.div
+          animate={{ rotate: isSelected ? 180 : 0 }}
+          transition={{ duration: 0.3 }}
+        >
+          <ChevronDown className="w-5 h-5" />
+        </motion.div>
+      </div>
+
+      <p className="font-thai text-sm text-gray-600 mb-2">
+        {route.description}
+      </p>
+
+      <p className="font-serif text-xs text-gray-400">
+        {route.address}
+      </p>
+
+      <div className="mt-4 flex flex-wrap gap-2">
+        <span
+          onClick={(e) => {
+            e.stopPropagation();
+            openMap(route.mapUrl);
+          }}
+          className="inline-flex items-center gap-1 text-sm font-thai hover:underline cursor-pointer"
+        >
+          <MapPin className="w-4 h-4" />
+          เปิดแผนที่
+        </span>
+      </div>
+    </motion.button>
   );
 }

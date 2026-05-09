@@ -9,6 +9,7 @@ import {
   ContactSection,
   FooterSection,
   MobileQuickActions,
+  StickyNav,
 } from "@/features/invitation";
 
 export default function HomePage() {
@@ -48,7 +49,8 @@ export default function HomePage() {
         </AnimatedSection>
       </main>
 
-      <MobileQuickActions />
+      {/* <MobileQuickActions /> */}
+      <StickyNav />
     </div>
   );
 }

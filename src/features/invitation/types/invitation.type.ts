@@ -49,6 +49,7 @@ export interface Route {
   mapUrl: string;
   streetViewUrl: string;
   description: string;
+  vehicleType: "car" | "motorcycle";
   steps: RouteStep[];
 }
 
