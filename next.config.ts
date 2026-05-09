@@ -10,14 +10,6 @@ const nextConfig: NextConfig = {
       },
     ],
   },
-  async rewrites() {
-    return [
-      {
-        source: "/",
-        destination: "/invitation",
-      },
-    ];
-  },
 };
 
 export default nextConfig;

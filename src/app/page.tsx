@@ -1,16 +1,54 @@
-"use client";
-
-import { useEffect } from "react";
+import {
+  AnimatedSection,
+  HeroSection,
+  LocationSection,
+  ScheduleSection,
+  DressCodeSection,
+  GallerySection,
+  RouteSelectorSection,
+  ContactSection,
+  FooterSection,
+  MobileQuickActions,
+} from "@/features/invitation";
 
 export default function HomePage() {
-  useEffect(() => {
-    // Redirect to invitation page
-    window.location.replace("/invitation");
-  }, []);
-
   return (
-    <div className="min-h-screen flex items-center justify-center bg-[#FAFAF8]">
-      <p className="font-thai text-gray-500">กำลังเปลี่ยนหน้า... รอสักครู่นะคะ</p>
+    <div className="relative">
+      <main className="snap-container">
+        <div className="snap-section">
+          <HeroSection />
+        </div>
+
+        <AnimatedSection animation="fade-up" delay={0.1} className="snap-section">
+          <ScheduleSection />
+        </AnimatedSection>
+
+        <AnimatedSection animation="scale" delay={0.1} className="snap-section">
+          <DressCodeSection />
+        </AnimatedSection>
+
+        <AnimatedSection animation="fade-up" delay={0.1} className="snap-section">
+          <GallerySection />
+        </AnimatedSection>
+
+        <AnimatedSection animation="fade-up" className="snap-section">
+          <LocationSection />
+        </AnimatedSection>
+
+        <AnimatedSection animation="fade-up" delay={0.1} className="snap-section">
+          <RouteSelectorSection />
+        </AnimatedSection>
+
+        <AnimatedSection animation="fade-up" delay={0.1} className="snap-section">
+          <ContactSection />
+        </AnimatedSection>
+
+        <AnimatedSection animation="fade-in" delay={0.1} className="snap-section">
+          <FooterSection />
+        </AnimatedSection>
+      </main>
+
+      <MobileQuickActions />
     </div>
   );
 }

@@ -55,7 +55,7 @@ export const metadata: Metadata = {
     images: ["/favicon.png"],
   },
   alternates: {
-    canonical: "/invitation",
+    canonical: "/",
   },
   verification: {
     google: "your-google-verification-code",
