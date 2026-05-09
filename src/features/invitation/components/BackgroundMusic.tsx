@@ -8,13 +8,66 @@ interface BackgroundMusicProps {
   videoId?: string;
 }
 
-const BackgroundMusic: React.FC<BackgroundMusicProps> = ({ 
-  videoId = "DSWYAclv2I8" // New Cafe / Bossa Nova vibe from user
+// Minimal YouTube API types (ES2015 Module Syntax)
+interface YTPlayer {
+  playVideo(): void;
+  pauseVideo(): void;
+  stopVideo(): void;
+  seekTo(seconds: number, allowSeekAhead: boolean): void;
+  getVolume(): number;
+  setVolume(volume: number): void;
+  mute(): void;
+  unMute(): void;
+  getPlayerState(): number;
+  destroy(): void;
+}
+
+interface YTPlayerOptions {
+  height?: string | number;
+  width?: string | number;
+  videoId?: string;
+  playerVars?: YTPlayerVars;
+  events?: YTPlayerEvents;
+}
+
+interface YTPlayerVars {
+  autoplay?: 0 | 1;
+  controls?: 0 | 1 | 2;
+  loop?: 0 | 1;
+  playlist?: string;
+  modestbranding?: 0 | 1;
+  enablejsapi?: 0 | 1;
+  origin?: string;
+  rel?: 0 | 1;
+  showinfo?: 0 | 1;
+}
+
+interface YTPlayerEvents {
+  onReady?: (event: { target: YTPlayer }) => void;
+  onStateChange?: (event: { target: YTPlayer; data: number }) => void;
+  onError?: (event: { target: YTPlayer; data: number }) => void;
+}
+
+interface YTAPI {
+  Player: {
+    new(elementId: string, options: YTPlayerOptions): YTPlayer;
+  };
+}
+
+declare global {
+  interface Window {
+    YT: YTAPI;
+    onYouTubeIframeAPIReady: () => void;
+  }
+}
+
+const BackgroundMusic: React.FC<BackgroundMusicProps> = ({
+  videoId = "DSWYAclv2I8"
 }) => {
   const [isPlaying, setIsPlaying] = useState(false);
   const [hasInteracted, setHasInteracted] = useState(false);
   const [isPlayerReady, setIsPlayerReady] = useState(false);
-  const playerRef = useRef<any>(null);
+  const playerRef = useRef<YTPlayer | null>(null);
 
   useEffect(() => {
     // Load YouTube IFrame API
@@ -26,8 +79,8 @@ const BackgroundMusic: React.FC<BackgroundMusicProps> = ({
     }
 
     // Initialize player when API is ready
-    (window as any).onYouTubeIframeAPIReady = () => {
-      playerRef.current = new (window as any).YT.Player('youtube-player', {
+    window.onYouTubeIframeAPIReady = () => {
+      playerRef.current = new window.YT.Player('youtube-player', {
         height: '0',
         width: '0',
         videoId: videoId,
@@ -37,6 +90,7 @@ const BackgroundMusic: React.FC<BackgroundMusicProps> = ({
           loop: 1,
           playlist: videoId,
           modestbranding: 1,
+          enablejsapi: 1,
         },
         events: {
           onReady: () => setIsPlayerReady(true),
@@ -46,8 +100,14 @@ const BackgroundMusic: React.FC<BackgroundMusicProps> = ({
 
     // If API is already loaded
     if (window.YT && window.YT.Player) {
-      (window as any).onYouTubeIframeAPIReady();
+      window.onYouTubeIframeAPIReady();
     }
+
+    return () => {
+      if (playerRef.current) {
+        playerRef.current.destroy();
+      }
+    };
   }, [videoId]);
 
   const togglePlay = () => {
@@ -67,7 +127,7 @@ const BackgroundMusic: React.FC<BackgroundMusicProps> = ({
     <div className="fixed bottom-6 left-6 z-50 flex items-center gap-3">
       {/* Hidden YouTube Player */}
       <div id="youtube-player" className="hidden"></div>
-      
+
       <div className="relative">
         <motion.button
           onClick={togglePlay}
@@ -75,9 +135,8 @@ const BackgroundMusic: React.FC<BackgroundMusicProps> = ({
           animate={{ scale: 1, opacity: 1 }}
           whileHover={{ scale: 1.1 }}
           whileTap={{ scale: 0.9 }}
-          className={`flex h-12 w-12 items-center justify-center rounded-full shadow-xl backdrop-blur-md border border-neutral-200 bg-white/90 text-neutral-800 ${
-            !isPlayerReady && 'opacity-50 cursor-not-allowed'
-          }`}
+          className={`flex h-12 w-12 items-center justify-center rounded-full shadow-xl backdrop-blur-md border border-neutral-200 bg-white/90 text-neutral-800 ${!isPlayerReady && 'opacity-50 cursor-not-allowed'
+            }`}
           disabled={!isPlayerReady}
           aria-label={isPlaying ? "Pause Music" : "Play Music"}
         >
@@ -90,7 +149,7 @@ const BackgroundMusic: React.FC<BackgroundMusicProps> = ({
                 exit={{ rotate: 180, opacity: 0 }}
               >
                 <Volume2 className="h-5 w-5 text-neutral-800" />
-                <motion.div 
+                <motion.div
                   className="absolute inset-0 rounded-full border-2 border-neutral-800"
                   animate={{ scale: [1, 1.5, 1], opacity: [0.5, 0, 0.5] }}
                   transition={{ duration: 2, repeat: Infinity }}
@@ -139,7 +198,7 @@ export default BackgroundMusic;
 
 declare global {
   interface Window {
-    YT: any;
+    YT: YTAPI;
     onYouTubeIframeAPIReady: () => void;
   }
 }
