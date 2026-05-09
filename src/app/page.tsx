@@ -10,6 +10,7 @@ import {
   FooterSection,
   MobileQuickActions,
   StickyNav,
+  BackgroundMusic,
 } from "@/features/invitation";
 
 export default function HomePage() {
@@ -51,6 +52,7 @@ export default function HomePage() {
 
       {/* <MobileQuickActions /> */}
       <StickyNav />
+      <BackgroundMusic />
     </div>
   );
 }

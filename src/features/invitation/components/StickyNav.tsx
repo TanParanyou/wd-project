@@ -61,10 +61,21 @@ export default function StickyNav() {
       }
     };
 
+    // Listen on both window and snap-container for desktop
     window.addEventListener("scroll", handleScroll, { passive: true });
+    const snapContainer = document.querySelector(".snap-container");
+    if (snapContainer) {
+      snapContainer.addEventListener("scroll", handleScroll, { passive: true });
+    }
+
     handleScroll(); // Initial check
 
-    return () => window.removeEventListener("scroll", handleScroll);
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+      if (snapContainer) {
+        snapContainer.removeEventListener("scroll", handleScroll);
+      }
+    };
   }, []);
 
   const scrollToSection = (id: string) => {
